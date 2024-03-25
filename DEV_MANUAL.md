@@ -31,9 +31,3 @@ To complete project repository:
 ```
 jupyter notebook --no-browser --port=10172 --ip=0.0.0.0
 ```
-
-## DVC Initialization for local directory
-```
-dvc init
-dvc remote add -d gd-remote gdrive://gdrive-folder-id>
-```

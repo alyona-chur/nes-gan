@@ -1,0 +1,50 @@
+# Model files
+**/*.h5
+**/*.hdf5
+**/*.pkl
+**/*.dat
+**/*.names
+**/*.cfg
+**/*.weights
+**/*.pth
+
+# Images
+**/*.png
+**/*.jpg
+**/*.avi
+**/*.mp4
+
+# Media files
+**/*.wav
+**/*.WAV
+
+# Video files
+**/*.mp4
+**/*.MP4
+
+# Compressed data
+**/*tar
+**/*tar.gz
+
+# Binary data
+**/*.npy
+**/*.a
+**/*.v
+
+# Directories
+.git/*
+labeling_raw/*
+labeling_ready/*
+test_data/*
+training_raw/*
+training_ready/*
+data/*
+model_data/*
+logs/*
+
+# Other
+**/*.git
+**/*.gitignore
+**/*.md
+**/*.log*
+**/*.zip
