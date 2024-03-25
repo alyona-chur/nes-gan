@@ -1,0 +1,13 @@
+dvc
+imageio
+ipython
+jupyter
+librosa
+matplotlib
+mlflow
+numpy
+opencv-python
+scikit-learn
+scipy
+torch
+tqdm
