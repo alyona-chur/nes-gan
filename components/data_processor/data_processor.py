@@ -33,6 +33,7 @@ class RepresentationFormat(Enum):
     ROLL = 'roll'
 
 
+# TODO: Use pytorch transform.
 class DataProcessor(LogWritingClass):
     """A class to manage data processing.
 
