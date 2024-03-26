@@ -1,0 +1,5 @@
+outs:
+- md5: 8185e2463cbed1e990f4922442d61929.dir
+  size: 108184960
+  nfiles: 13003
+  path: nesmdb24_seprsco_train_ready

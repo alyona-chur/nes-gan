@@ -1,4 +1,4 @@
-# NES Music GAN
+# Generative Adversarial Network for Nintendo Entertainment System Music
 Generative Adversarial Network for Nintendo Entertainment System music generation.
 
 - Training on [The NES Music Database](https://github.com/chrisdonahue/nesmdb), nesmdb24_seprsco format.
