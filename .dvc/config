@@ -1,6 +1,4 @@
 [core]
-    remote = local-remote
-['remote "gd-remote"']
-    url = gdrive://1CMuiZdHagOLjyNkQ_zXX__0FB4dZ5USr
-['remote "local-remote"']
+    remote = remote
+['remote "remote"']
     url = ../data
