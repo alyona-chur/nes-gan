@@ -158,3 +158,72 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# IDE specific stuff
+.idea
+.vscode
+
+# Binary numpy array data
+*.npy
+
+# Model snapshot files
+*.h5
+*.hdf5
+*.pkl
+*.dat
+*.weights
+*.rt
+*.pdparams
+*.onnx
+*.zip
+
+# Images
+*.png
+*.jpg
+!data/test_meme.jpg
+!data/test_portrait.jpg
+!data/test_sticker.jpg
+!data/watermarks/
+!data/watermarks/text_bbbbb.png
+
+# Media files
+*.wav
+*.WAV
+*.avi
+
+# Video files
+*.mp4
+*.MP4
+
+# Compressed data
+*tar
+*tar.gz
+
+# Text data
+*.sbv
+*.srt
+*.vtt
+*.txt
+*.csv
+*.log*
+!requirements.txt
+!requirements_prod.txt
+!pre-commit/requirements_pre-commit.txt
+
+# Data
+!.gitkeep
+*.names
+*.cfg
+*.db
+*.db-shm
+*.db-wal
+*.pth
+*.pth.*
+*.conv.*
+*.ini
+*.rdb
+*.json
+appendonlydir
+
+# Configuration
+!components/data_processor/example_config.yaml
