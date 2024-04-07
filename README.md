@@ -1,5 +1,14 @@
 # Generative Adversarial Network for Nintendo Entertainment System Music
-Generative Adversarial Network for Nintendo Entertainment System music generation.
 
-- Training on [The NES Music Database](https://github.com/chrisdonahue/nesmdb), nesmdb24_seprsco format.
-- Model is in training. To see the current best result, open ```gan_for_nes_music_results_*.ipynb``` notebook in Google Colab.
+## About
+
+This project generates new 8-bit style music using a Generative Adversarial Network (GAN), trained on the [The NES Music Database](https://github.com/chrisdonahue/nesmdb).
+
+## Progress
+- Model is in training. Check `gan_for_nes_music_results_*.ipynb` for latest music samples.
+
+## Data
+Trained on [The NES Music Database](https://github.com/chrisdonahue/nesmdb) in `nesmdb24_seprsco` format.
+
+## Usage
+- Open `gan_for_nes_music_results_*.ipynb` to listen to generated music.
