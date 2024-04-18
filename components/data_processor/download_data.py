@@ -1,4 +1,4 @@
-"""Downloads and prepares data for training."""
+"""Downloads data for training."""
 from argparse import ArgumentParser
 from pathlib import Path
 import shutil
@@ -20,41 +20,23 @@ from components.data_processor.data_processor import DataProcessor
 
 
 def main(configuration: Dict[Any, Any]):
-    """Downloads and prepares data for training.
+    """Downloads data for training.
 
     Args:
-        input_dir: Str, input directory path.
-        output_dir: Str, output directory path.
+        configuration: Parsed configuration.
     """
     logger = LoggerManager(None)
     config = DataProcessorConfiguration(configuration.data_processing)
 
     result_data_dir = get_absolute_path(config.data_dir, ROOT_DIR)
     downloaded_data_dir = result_data_dir / Path('nesmdb24_seprsco_united')
-    represented_data_dir = result_data_dir / Path(
-        f'nesmdb24_seprsco_{config.representation}_len{config.sample_len}_'
-        f'step{config.cutting_step}_row{config.rows}')
-    visible_data_dir = result_data_dir / Path(
-        f'nesmdb24_seprsco_{config.representation}_len{config.sample_len}_'
-        f'step{config.cutting_step}_row{config.rows}_visible')
-
-    tmp_data_dir = get_absolute_path(TMP_DATA_DIR, ROOT_DIR)
-    tmp_data_dir.mkdir(parents=True, exist_ok=True)
-    scaled_data_dir = tmp_data_dir / Path('scaled')
-    cut_data_dir = tmp_data_dir / Path('cut')
 
     data_processor = DataProcessor(config, logger)
     data_processor.download_data(downloaded_data_dir)
-    data_processor.scale(downloaded_data_dir, scaled_data_dir)
-    data_processor.cut(scaled_data_dir, cut_data_dir)
-    data_processor.represent(cut_data_dir, represented_data_dir)
-    data_processor.convert_to_png(represented_data_dir, visible_data_dir)
-
-    shutil.rmtree(tmp_data_dir)
 
 
 if __name__ == "__main__":
-    arg_parser = ArgumentParser(description='Downloada and prepares data for training.')
+    arg_parser = ArgumentParser(description='Downloads data for training.')
 
     arg_parser.add_argument(
         '-c',
@@ -62,7 +44,7 @@ if __name__ == "__main__":
         metavar='path/to/dir',
         type=str,
         help="Configuration path.",
-        default='./../../params.yaml'
+        default='./params.yaml'
     )
 
     parsed_args = arg_parser.parse_args()

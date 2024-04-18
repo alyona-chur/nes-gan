@@ -4,6 +4,7 @@ import logging
 from multiprocessing import Pool
 from pathlib import Path
 import pickle
+import shutil
 import subprocess
 
 import cv2
@@ -13,6 +14,7 @@ from components.common.configuration import DataProcessorConfiguration
 from components.common.constants import LOGGER_NAME
 from components.common.constants import NOISE_MAX_VAL
 from components.common.constants import NOISE_MIN_VAL
+from components.common.constants import SCORE_DATA_RATE
 from components.common.constants import SEPRSCO_DATASET_DOWNLOAD_LINK
 from components.common.constants import PULSES12_MAX_VAL
 from components.common.constants import PULSES12_MIN_VAL
@@ -47,10 +49,10 @@ class DataProcessor(LogWritingClass):
         _rows: Int, number of rows for stacking.
 
     Note:
-        Forward processing: original -> scaled -> cut -> represented (used for training).
-                                |                                  |
-                                v                                  v
-                     wav (when original is not wav)             visible (png)
+        Forward processing: original -> cut -> scaled -> represented (used for training).
+                                         |                         |
+                                         v                         v
+                           wav (when original is not wav)       visible (png)
         Backward processing: represented -> scaled -> original.
                                 |                        |
                                 v                        v
@@ -74,6 +76,10 @@ class DataProcessor(LogWritingClass):
 
         self._log(logging.INFO, 'Initialized Data Processor.')
 
+    @property
+    def original_data_format(self) -> str:
+        return self._original_format.value
+
     def _download_sepsco_data(self, download_to_dir: Path):
         """Downloads and extracts data.
 
@@ -81,14 +87,17 @@ class DataProcessor(LogWritingClass):
             download_to_dir: Where to download.
         """
         tmp_file = Path('./nesmdb24_seprsco.tar.gz')
-        subprocess.check_call(['wget', '--no-check-certificate', SEPRSCO_DATASET_DOWNLOAD_LINK],
-                               '-O', './nesmdb24_seprsco.tar.gz')
+        tmp_dir = Path('./tmp')
+        tmp_dir.mkdir(parents=True, exist_ok=False)
+        download_to_dir.mkdir(parents=True, exist_ok=True)
+        subprocess.check_call(['wget', '--no-check-certificate', SEPRSCO_DATASET_DOWNLOAD_LINK,
+                               '-O', str(tmp_file)])
         subprocess.check_call(['tar', 'xvfz', str(tmp_file), '-C', './tmp'])
-        subprocess.check_call(['mv', './tmp/train/*', str(download_to_dir.resolve())])
-        subprocess.check_call(['mv', './tmp/test/*', str(download_to_dir.resolve())])
-        subprocess.check_call(['mv', './tmp/valid/*', str(download_to_dir.resolve())])
-        subprocess.check_call(['rm', './tmp', '-r'])
+        subprocess.check_call(f'mv ./tmp/nesmdb24_seprsco/train/* {download_to_dir}', shell=True)
+        subprocess.check_call(f'mv ./tmp/nesmdb24_seprsco/test/* {download_to_dir}', shell=True)
+        subprocess.check_call(f'mv ./tmp/nesmdb24_seprsco/valid/* {download_to_dir}', shell=True)
         subprocess.check_call(['rm', 'nesmdb24_seprsco.tar.gz'])
+        shutil.rmtree(tmp_dir)
 
         # for path in (download_to_dir / Path('train')).iterdir():
         #     if path.is_file():
@@ -110,8 +119,21 @@ class DataProcessor(LogWritingClass):
         else:
             raise ValueError(f'Unsupported original format: {self._original_format} '
                              f'in download_data method.')
+        self._log(logging.INFO, 'Downloaded data.')
 
     # Forward
+
+    def cut(self, songs_dir: Path, cuts_dir: Path):
+        """Cuts songs into fragments."""
+        if self._original_format == OriginalDataFormat.SEPRSCO:
+            cuts_dir.mkdir(parents=True, exist_ok=True)
+            with Pool() as pool:
+                pool.starmap(cut_seprsco_song, [(file, cuts_dir, self._sample_len, self._cutting_step)
+                                        for file in list(songs_dir.iterdir())])
+        else:
+            raise ValueError(f'Unsupported original format: {self._original_format} '
+                             f'in cut method.')
+        self._log(logging.INFO, 'Cut data.')
 
     def scale(self, original_data_dir: Path, scaled_data_dir: Path):
         """Scales data using min-max scaling according to instruments range."""
@@ -124,13 +146,7 @@ class DataProcessor(LogWritingClass):
         else:
             raise ValueError(f'Unsupported original format: {self._original_format} '
                              f'in scale method.')
-
-    def cut(self, songs_dir: Path, cuts_dir: Path):
-        """Cuts songs into fragments."""
-        with Pool() as pool:
-            cuts_dir.mkdir(parents=True, exist_ok=True)
-            pool.starmap(cut_song, [(file, cuts_dir, self._sample_len, self._cutting_step)
-                                    for file in list(songs_dir.iterdir())])
+        self._log(logging.INFO, 'Scaled data.')
 
     def represent(self, songs_dir: Path, represented_data_dir: Path):
         """Represents fragments by stacking scaled and cut data."""
@@ -139,6 +155,7 @@ class DataProcessor(LogWritingClass):
             pool.starmap(represent_as_piano_roll_stack,
                          [(file, represented_data_dir, self._rows)
                           for file in list(songs_dir.iterdir())])
+        self._log(logging.INFO, f'Represented data as {self._representation}.')
 
     # Backward
 
@@ -164,13 +181,14 @@ class DataProcessor(LogWritingClass):
 
     # Conversion
 
-    def convert_npy_to_png(self, npy_dir: Path, png_dir: Path):
+    def convert_to_png(self, npy_dir: Path, png_dir: Path):
         """Converts npy files to png."""
         with Pool() as pool:
             png_dir.mkdir(parents=True, exist_ok=True)
             pool.starmap(convert_npy_to_png,
                          [(file, png_dir, self._rows)
                           for file in list(npy_dir.iterdir())])
+        self._log(logging.INFO, f'Created a .png version of data.')
 
     def convert_to_wav(self, data_dir: Path, wav_dir: Path):
         """Converts original data to wav."""
@@ -179,6 +197,7 @@ class DataProcessor(LogWritingClass):
         else:
             raise ValueError(f'Unsupported original format: '
                              f'{self._original_format} in convert_to_wav method.')
+        self._log(logging.INFO, f'Created a .wav version of data.')
 
 
 def check_file_exists_and_not_empty(file_path: Path):
@@ -194,7 +213,7 @@ def read_seprsco_song(song_path: Path):
 
 def save_seprsco_song(song_data: np.ndarray, song_path: Path):
     with open(song_path, 'wb') as f:
-        pickle.dump(song_data, f, protocol=2)
+        pickle.dump((SCORE_DATA_RATE, song_data.shape[1], song_data), f, protocol=2)
 
 
 def scale_instrument_min_max(inst_data: np.ndarray, inst_min: float, inst_max: float):
@@ -227,11 +246,11 @@ def unscale_seprsco_song_min_max(input_path: Path, output_dir: Path):
     save_seprsco_song(song, output_dir / f'{input_path.stem}.pkl')
 
 
-def cut_song(input_path: Path, output_dir: Path, sample_len: int, cutting_step: int):
-    song = np.load(str(input_path)).astype(np.float)
+def cut_seprsco_song(input_path: Path, output_dir: Path, sample_len: int, cutting_step: int):
+    song = read_seprsco_song(input_path).astype(np.float)
     for i, start in enumerate(range(0, len(song[0]) - sample_len + 1, cutting_step)):
         end = start + sample_len
-        np.save(str(output_dir / Path(f'{input_path.stem}__{i}')), song[:, start:end])
+        save_seprsco_song(song[:, start:end], output_dir / Path(f'{input_path.stem}.pkl'))
 
 
 def represent_as_piano_roll_stack(input_path: Path, output_dir: Path, rows: int):

@@ -4,7 +4,7 @@
 # Build command and run
 cmd="docker build "
 cmd+="-t mlflow-server "
-cmd+="-f ./docker/local_ml_flow_server.Dockerfile"
+cmd+="-f ./docker/local_mlflow_server.Dockerfile"
 cmd+=". "
 
 echo "$cmd" && \
