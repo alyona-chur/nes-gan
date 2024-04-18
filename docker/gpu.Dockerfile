@@ -43,8 +43,8 @@ RUN apt-get update && apt-get install -y \
 ARG USER_ID
 ARG GROUP_ID
 ARG USER_NAME
-RUN addgroup --gid $GROUP_ID $USER_NAME
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
+RUN addgroup --gid $GROUP_ID $USER_NAME --force-badname
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME --force-badname
 
 # Python environment and arguments
 ENV LANG C.UTF-8
@@ -54,12 +54,12 @@ ARG PYTHON2=python
 ARG PIP2=pip2
 
 # Install required Python packages
-RUN apt-get update && apt-get install -y ${PYTHON}-pip
-RUN apt-get update && apt-get install -y ${PYTHON2}-pip
+# RUN apt-get update && apt-get install -y ${PYTHON}-pip
+# RUN apt-get update && apt-get install -y ${PYTHON2}-pip
 RUN ${PIP} --no-cache-dir install --upgrade pip
 
 # Install required pip packages
-COPY ./docker/requirements.txt ./
+COPY ./requirements.txt ./
 RUN ${PIP} install --upgrade pip \
    && ${PIP} install --no-cache-dir -r requirements.txt \
    && rm requirements.txt

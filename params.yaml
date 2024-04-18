@@ -1,0 +1,10 @@
+data_processing:
+  data_dir: ./data
+
+  # Data Representation Format for the model.
+  #   - 'roll', Piano Roll-like matrix from seprsco.
+  representation: 'roll'
+
+  sample_len: 256  # 24 Hz, 256 / 24 ~ 10,6 sec.
+  cutting_step: 256  # No overlapping when sample_len >= cutting_step.
+  rows: 8

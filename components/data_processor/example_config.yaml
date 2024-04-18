@@ -1,8 +1,0 @@
-replace_if_exists: false
-
-# Data Representation Format for the model.
-#   - 'roll', Piano Roll-like matrix.
-representation: 'roll'
-sample_len: 12
-cutting_step: 12  # No overlapping when sample_len >= cutting_step.
-rows: 8

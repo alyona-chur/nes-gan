@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script runs docker in interactive way.
 
 # Parse input parameters
 # -t for gpu usage
@@ -38,5 +39,5 @@ cmd+="-p 10172:10172 "
 cmd+="${IMAGE_NAME} "
 cmd+="/bin/bash"
 
-echo "$cmd"  && \
+echo "$cmd" && \
 eval "$cmd"
