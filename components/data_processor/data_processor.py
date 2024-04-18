@@ -74,8 +74,6 @@ class DataProcessor(LogWritingClass):
         self._cutting_step = config.cutting_step
         self._rows = config.rows
 
-        self._log(logging.INFO, 'Initialized Data Processor.')
-
     @property
     def original_data_format(self) -> str:
         return self._original_format.value
@@ -128,8 +126,9 @@ class DataProcessor(LogWritingClass):
         if self._original_format == OriginalDataFormat.SEPRSCO:
             cuts_dir.mkdir(parents=True, exist_ok=True)
             with Pool() as pool:
-                pool.starmap(cut_seprsco_song, [(file, cuts_dir, self._sample_len, self._cutting_step)
-                                        for file in list(songs_dir.iterdir())])
+                pool.starmap(cut_seprsco_song,
+                             [(file, cuts_dir, self._sample_len, self._cutting_step)
+                               for file in list(songs_dir.iterdir())])
         else:
             raise ValueError(f'Unsupported original format: {self._original_format} '
                              f'in cut method.')
@@ -141,7 +140,7 @@ class DataProcessor(LogWritingClass):
             scaled_data_dir.mkdir(parents=True, exist_ok=True)
             with Pool() as pool:
                 pool.starmap(scale_seprsco_song_min_max,
-                             [(file, original_data_dir)
+                             [(file, scaled_data_dir)
                               for file in list(original_data_dir.iterdir())])
         else:
             raise ValueError(f'Unsupported original format: {self._original_format} '
@@ -186,8 +185,7 @@ class DataProcessor(LogWritingClass):
         with Pool() as pool:
             png_dir.mkdir(parents=True, exist_ok=True)
             pool.starmap(convert_npy_to_png,
-                         [(file, png_dir, self._rows)
-                          for file in list(npy_dir.iterdir())])
+                         [(file, png_dir) for file in list(npy_dir.iterdir())])
         self._log(logging.INFO, f'Created a .png version of data.')
 
     def convert_to_wav(self, data_dir: Path, wav_dir: Path):
@@ -213,7 +211,7 @@ def read_seprsco_song(song_path: Path):
 
 def save_seprsco_song(song_data: np.ndarray, song_path: Path):
     with open(song_path, 'wb') as f:
-        pickle.dump((SCORE_DATA_RATE, song_data.shape[1], song_data), f, protocol=2)
+        pickle.dump((SCORE_DATA_RATE, song_data.shape[1], song_data.T), f, protocol=2)
 
 
 def scale_instrument_min_max(inst_data: np.ndarray, inst_min: float, inst_max: float):
@@ -227,6 +225,7 @@ def scale_seprsco_song_min_max(input_path: Path, output_dir: Path):
     scale_instrument_min_max(song[:2, :], PULSES12_MIN_VAL, PULSES12_MAX_VAL)
     scale_instrument_min_max(song[2, :], TRIANGLE_MIN_VAL, TRIANGLE_MAX_VAL)
     scale_instrument_min_max(song[3, :], NOISE_MIN_VAL, NOISE_MAX_VAL)
+
     np.save(str(output_dir / input_path.stem), song)
 
 
@@ -272,8 +271,8 @@ def unrepresent_as_piano_roll_stack(input_path: Path, output_dir: Path, rows: in
     np.save(str(output_dir / input_path.stem), np.concatenate(stack_list, axis=1))
 
 
-def convert_npy_to_png(input_path: Path, output_path: Path):
+def convert_npy_to_png(input_path: Path, output_dir: Path):
     song = np.load(str(input_path)).astype(np.float)
-    array_normalized = cv2.normalize(array, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+    array_normalized = cv2.normalize(song, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     array_normalized = array_normalized.astype('uint8')
-    cv2.imwrite(output_dir / f'{input_path.stem}.png', array_normalized)
+    cv2.imwrite(str(output_dir / f'{input_path.stem}.png'), array_normalized)

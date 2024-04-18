@@ -43,8 +43,8 @@ def main(configuration: Dict[Any, Any]):
 
     tmp_data_dir = get_absolute_path(TMP_DATA_DIR, ROOT_DIR)
     tmp_data_dir.mkdir(parents=True, exist_ok=True)
-    scaled_data_dir = tmp_data_dir / Path('scaled')
     cut_data_dir = tmp_data_dir / Path('cut')
+    scaled_data_dir = tmp_data_dir / Path('scaled')
 
     data_processor = DataProcessor(config, logger)
     data_processor.cut(downloaded_data_dir, cut_data_dir)
@@ -53,7 +53,7 @@ def main(configuration: Dict[Any, Any]):
     data_processor.represent(scaled_data_dir, represented_data_dir)
     data_processor.convert_to_png(represented_data_dir, visible_data_dir)
 
-    shutil.rmtree(tmp_data_dir)
+    # shutil.rmtree(tmp_data_dir)
 
 
 if __name__ == "__main__":

@@ -4,14 +4,11 @@
 # Parse input parameters
 # -t for gpu usage
 IMAGE_TYPE="cpu"
-while getopts ":t" opt; do
+while getopts ":t:" opt; do
   case $opt in
-    t) image_type="$OPTARG"
-      if [ "$docker_image_type" != "" ]; then
-        IMAGE_TYPE="$image_type"
-      fi
-    ;;
+    t) IMAGE_TYPE=$OPTARG;;
     \?) echo "Invalid option -$OPTARG" >&2;;
+    :) echo "Option -$OPTARG requires an argument." >&2;;
   esac
 done
 
