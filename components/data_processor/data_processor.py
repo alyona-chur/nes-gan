@@ -223,11 +223,11 @@ class DataProcessor(LogWritingClass):
         """Converts original data to wav."""
         if self._original_format == OriginalDataFormat.SEPRSCO:
             wav_dir.mkdir(parents=True, exist_ok=True)
-            # with Pool() as pool:
-            #     pool.starmap(convert_seprsco_to_wav,
-            #                  [(file, wav_dir) for file in list(seprsco_dir.iterdir())])
-            for file in seprsco_dir.iterdir():
-                convert_seprsco_to_wav(file, wav_dir)
+            with Pool() as pool:
+                pool.starmap(convert_seprsco_to_wav,
+                             [(file, wav_dir) for file in list(seprsco_dir.iterdir())])
+            # for file in seprsco_dir.iterdir():
+            #     convert_seprsco_to_wav(file, wav_dir)
         else:
             raise ValueError(f'Unsupported original format: '
                              f'{self._original_format} in convert_to_wav method.')
