@@ -1,5 +1,4 @@
 #!/bin/bash
-# This script runs docker in an interactive way.
 
 # Parse input parameters
 IMAGE_TYPE="cpu"
@@ -35,7 +34,11 @@ cmd+="--rm "
 cmd+="--name ${IMAGE_NAME}-$(whoami) "
 cmd+="-p $PORT:$PORT "
 cmd+="${IMAGE_NAME} "
-cmd+="/bin/bash"
+cmd+="/bin/bash -c "
+cmd+="\"python3.7 components/data_processor/download_data.py && "
+cmd+="python3.7 components/data_processor/prepare_training_data.py && "
+cmd+="python3.7 components/gan_trainer/train_model.py\""
+# cmd+="/bin/bash"
 
 echo "$cmd" && \
 eval "$cmd"

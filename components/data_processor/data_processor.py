@@ -87,7 +87,9 @@ class DataProcessor(LogWritingClass):
             download_to_dir: Where to download.
         """
         tmp_file = Path('./nesmdb24_seprsco.tar.gz')
-        tmp_dir = Path('./download_tmp')
+        tmp_dir = Path('./data/tmp_downloading')
+        if tmp_dir.is_dir():
+            shutil.rmtree(tmp_dir)
         tmp_dir.mkdir(parents=True, exist_ok=False)
         download_united_to_dir.mkdir(parents=True, exist_ok=True)
         download_train_to_dir.mkdir(parents=True, exist_ok=True)
@@ -95,19 +97,24 @@ class DataProcessor(LogWritingClass):
         download_test_to_dir.mkdir(parents=True, exist_ok=True)
         subprocess.check_call(['wget', '--no-check-certificate', SEPRSCO_DATASET_DOWNLOAD_LINK,
                                '-O', str(tmp_file)])
-        subprocess.check_call(['tar', 'xvfz', str(tmp_file), '-C', './download_tmp'])
+        subprocess.check_call(['tar', 'xvfz', str(tmp_file), '-C', './data/tmp_downloading'])
         subprocess.check_call(
-            f'cp ./download_tmp/nesmdb24_seprsco/train/* {download_train_to_dir}', shell=True)
+            f'cp ./data/tmp_downloading/nesmdb24_seprsco/train/* {download_train_to_dir}',
+            shell=True)
         subprocess.check_call(
-            f'cp ./download_tmp/nesmdb24_seprsco/valid/* {download_valid_to_dir}', shell=True)
-        subprocess.check_call(f'cp ./download_tmp/nesmdb24_seprsco/test/* {download_test_to_dir}',
+            f'cp ./data/tmp_downloading/nesmdb24_seprsco/valid/* {download_valid_to_dir}',
+            shell=True)
+        subprocess.check_call(f'cp ./data/tmp_downloading/nesmdb24_seprsco/test/* {download_test_to_dir}',
                               shell=True)
         subprocess.check_call(
-            f'mv ./download_tmp/nesmdb24_seprsco/train/* {download_united_to_dir}', shell=True)
+            f'mv ./data/tmp_downloading/nesmdb24_seprsco/train/* {download_united_to_dir}',
+            shell=True)
         subprocess.check_call(
-            f'mv ./download_tmp/nesmdb24_seprsco/test/* {download_united_to_dir}', shell=True)
+            f'mv ./data/tmp_downloading/nesmdb24_seprsco/test/* {download_united_to_dir}',
+            shell=True)
         subprocess.check_call(
-            f'mv ./download_tmp/nesmdb24_seprsco/valid/* {download_united_to_dir}', shell=True)
+            f'mv ./data/tmp_downloading/nesmdb24_seprsco/valid/* {download_united_to_dir}',
+            shell=True)
         subprocess.check_call(['rm', 'nesmdb24_seprsco.tar.gz'])
         shutil.rmtree(tmp_dir)
 

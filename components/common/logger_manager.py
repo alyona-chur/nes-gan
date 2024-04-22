@@ -16,6 +16,9 @@ def set_logging(log_file_path: Optional[Path] = None):
     Args:
         log_file_path: A path to log file if writing to file is required.
     """
+    if log_file_path is not None:
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
+
     level = logging.INFO
 
     # Create logger

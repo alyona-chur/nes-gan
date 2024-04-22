@@ -58,6 +58,7 @@ class GanTrainer(LogWritingClass):
                  train_data_path: Path,
                  valid_data_path: Path,
                  data_processor: DataProcessor,
+                 generated_data_dir: Path,
                  tmp_dir: Path,
                  logger_manager: LoggerManager):
         LogWritingClass.__init__(self,
@@ -74,6 +75,7 @@ class GanTrainer(LogWritingClass):
 
         # Training
         self._data_processor = data_processor
+        self._generated_data_dir = generated_data_dir
         self._tmp_dir = tmp_dir
         self._train_dataloader: DataLoader = None
         self._valid_dataloader: DataLoader = None
@@ -199,9 +201,10 @@ class GanTrainer(LogWritingClass):
                     noise = torch.randn(GENERATIONS_NUM, self._noise_vector_len)
                     represented_songs_batch = self._generator(noise).detach().cpu()
 
-                    self._tmp_dir.mkdir(parents=True, exist_ok=False)
                     represented_dir = self._tmp_dir / Path('represented')
                     represented_dir.mkdir(parents=True, exist_ok=False)
+                    epoch_generated_data_dir = self._generated_data_dir / Path(f'epoch{epoch}')
+                    epoch_generated_data_dir.mkdir(parents=True, exist_ok=False)
                     for i, represented_song in enumerate(represented_songs_batch):
                         represented_song = represented_song.permute(1, 2, 0).numpy()
                         png_song = cv2.normalize(
@@ -229,6 +232,7 @@ class GanTrainer(LogWritingClass):
                                                         self._tmp_dir / Path('wavs'))
                     for wav_file in (self._tmp_dir / Path('wavs')).iterdir():
                         mlflow.log_artifact(wav_file, artifact_path=f'results_epoch{epoch}_wav')
+                        shutil.copy(wav_file, str(epoch_generated_data_dir))
 
                     shutil.rmtree(str(self._tmp_dir))
 
@@ -308,6 +312,7 @@ class GanTrainer(LogWritingClass):
         self._log(logging.INFO,
                   f'Starting training for {mlflow_experiment_name} experiment. '
                   f'Using device: {torch.device("cuda" if torch.cuda.is_available() else "cpu")}')
+        self._generated_data_dir.mkdir(parents=True, exist_ok=False)
 
         with mlflow.start_run():
             for param_name, param_value in other_params_to_log.items():
