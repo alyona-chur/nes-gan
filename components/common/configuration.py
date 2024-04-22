@@ -13,8 +13,6 @@ class DataProcessorConfiguration:
         Args:
             config_data: Configuration.
         """
-        self.data_dir = config_data['data_dir']
-
         self.representation = str(config_data['representation'])
         self.sample_len = int(config_data['sample_len'])
         self.cutting_step = int(config_data['cutting_step'])

@@ -1,14 +1,15 @@
 #!/bin/bash
-# This script runs docker in interactive way.
+# This script runs docker in an interactive way.
 
 # Parse input parameters
-# -t for gpu usage
 IMAGE_TYPE="cpu"
-while getopts ":t:" opt; do
+PORT=10172
+while getopts ":t:p:" opt; do
   case $opt in
     t) IMAGE_TYPE=$OPTARG;;
-    \?) echo "Invalid option -$OPTARG" >&2;;
-    :) echo "Option -$OPTARG requires an argument." >&2;;
+    p) PORT=$OPTARG;;
+    \?) echo "Invalid option -$OPTARG" >&2; exit 1;;
+    :) echo "Option -$OPTARG requires an argument." >&2; exit 1;;
   esac
 done
 
@@ -20,7 +21,7 @@ if [ "$IMAGE_TYPE" == "gpu" ]; then
 elif [ "$IMAGE_TYPE" == "cpu" ]; then
   IMAGE_NAME='nesm-gan-cpu'
 else
-  echo "Unable to run docker container, unknown image type $IMAGE_TYPE";
+  echo "Unable to run docker container, unknown image type $IMAGE_TYPE"
   exit 1
 fi
 
@@ -31,8 +32,8 @@ cmd+="${GPU_CMD}"
 cmd+="--mount type=bind,source=$(pwd),destination=/usr/src/app "
 cmd+="-it "
 cmd+="--rm "
-cmd+="--name nesm-gan-$(whoami) "
-cmd+="-p 10172:10172 "
+cmd+="--name ${IMAGE_NAME}-$(whoami) "
+cmd+="-p $PORT:$PORT "
 cmd+="${IMAGE_NAME} "
 cmd+="/bin/bash"
 

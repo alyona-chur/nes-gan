@@ -1,4 +1,4 @@
-"""Downloads and prepares data for training."""
+"""Prepares data for training."""
 from argparse import ArgumentParser
 from pathlib import Path
 import shutil
@@ -17,47 +17,70 @@ from components.common.constants import TMP_DATA_DIR
 from components.common.logger_manager import LoggerManager
 from components.common.path_lib import get_absolute_path
 from components.data_processor.data_processor import DataProcessor
+from components.data_processor.data_processor import downloaded_data_paths
 
 
 def main(configuration: Dict[Any, Any]):
-    """Downloads and prepares data for training.
+    """Prepares data for training.
 
     Args:
-        input_dir: Str, input directory path.
-        output_dir: Str, output directory path.
+        configuration: Parsed configuration.
     """
     logger = LoggerManager(None)
-    config = DataProcessorConfiguration(configuration.data_processing)
+    downloaded_data_path = get_absolute_path(configuration.downloaded_data_dir, ROOT_DIR)
+    config = DataProcessorConfiguration(configuration.data_processor)
 
-    result_data_dir = get_absolute_path(config.data_dir, ROOT_DIR)
-    downloaded_data_dir = result_data_dir / Path('nesmdb24_seprsco_united')
-    represented_data_dir = result_data_dir / Path('training') / Path(
-        f'nesmdb24_seprsco_{config.representation}_len{config.sample_len}_'
-        f'step{config.cutting_step}_row{config.rows}')
-    visible_data_dir = result_data_dir / Path('training') / Path(
-        f'nesmdb24_seprsco_{config.representation}_len{config.sample_len}_'
-        f'step{config.cutting_step}_row{config.rows}_visible')
-    playable_data_dir = result_data_dir / Path('training') / Path(
-        f'nesmdb24_seprsco_{config.representation}_len{config.sample_len}_'
-        f'step{config.cutting_step}_row{config.rows}_playable')
+    (downloaded_united_data_dir,
+     downloaded_train_data_dir, downloaded_valid_data_dir,
+     downloaded_test_data_dir) = downloaded_data_paths(downloaded_data_path)
+
+    result_data_dir = get_absolute_path(configuration.train_data_dir, ROOT_DIR)
+    represented_united_data_dir = result_data_dir / Path('united')
+    visible_united_data_dir = result_data_dir / Path('united_visible')
+    playable_united_data_dir = result_data_dir / Path('united_playable')
+    represented_train_data_dir = result_data_dir / Path('train')
+    represented_valid_data_dir = result_data_dir / Path('valid')
+    represented_test_data_dir = result_data_dir / Path('test')
 
     tmp_data_dir = get_absolute_path(TMP_DATA_DIR, ROOT_DIR)
-    tmp_data_dir.mkdir(parents=True, exist_ok=True)
-    cut_data_dir = tmp_data_dir / Path('cut')
-    scaled_data_dir = tmp_data_dir / Path('scaled')
+    cut_data_dir = tmp_data_dir / Path('cut_train')
+    scaled_data_dir = tmp_data_dir / Path('scaled_train')
 
     data_processor = DataProcessor(config, logger)
-    data_processor.cut(downloaded_data_dir, cut_data_dir)
-    # data_processor.convert_to_wav(cut_data_dir, playable_data_dir)
-    data_processor.scale(cut_data_dir, scaled_data_dir)
-    data_processor.represent(scaled_data_dir, represented_data_dir)
-    data_processor.convert_to_png(represented_data_dir, visible_data_dir)
 
-    # shutil.rmtree(tmp_data_dir)
+    # United
+    tmp_data_dir.mkdir(parents=True, exist_ok=True)
+    data_processor.cut(downloaded_united_data_dir, cut_data_dir)
+    data_processor.convert_to_wav(cut_data_dir, playable_united_data_dir)
+    data_processor.scale(cut_data_dir, scaled_data_dir)
+    data_processor.represent(scaled_data_dir, represented_united_data_dir)
+    data_processor.convert_to_png(represented_united_data_dir, visible_united_data_dir)
+    shutil.rmtree(tmp_data_dir)
+
+    # Train
+    tmp_data_dir.mkdir(parents=True, exist_ok=True)
+    data_processor.cut(downloaded_train_data_dir, cut_data_dir)
+    data_processor.scale(cut_data_dir, scaled_data_dir)
+    data_processor.represent(scaled_data_dir, represented_train_data_dir)
+    shutil.rmtree(tmp_data_dir)
+
+     # Valid
+    tmp_data_dir.mkdir(parents=True, exist_ok=True)
+    data_processor.cut(downloaded_valid_data_dir, cut_data_dir)
+    data_processor.scale(cut_data_dir, scaled_data_dir)
+    data_processor.represent(scaled_data_dir, represented_valid_data_dir)
+    shutil.rmtree(tmp_data_dir)
+
+    # Test
+    tmp_data_dir.mkdir(parents=True, exist_ok=True)
+    data_processor.cut(downloaded_test_data_dir, cut_data_dir)
+    data_processor.scale(cut_data_dir, scaled_data_dir)
+    data_processor.represent(scaled_data_dir, represented_test_data_dir)
+    shutil.rmtree(tmp_data_dir)
 
 
 if __name__ == "__main__":
-    arg_parser = ArgumentParser(description='Downloada and prepares data for training.')
+    arg_parser = ArgumentParser(description='Prepares data for training.')
 
     arg_parser.add_argument(
         '-c',

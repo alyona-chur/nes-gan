@@ -1,10 +1,31 @@
-data_processing:
-  data_dir: ./data
+downloaded_data_dir: ./data/downloaded
+train_data_dir: ./data/training/nesmdb24_seprsco_roll_len256_step256_row8
 
-  # Data Representation Format for the model.
-  #   - 'roll', Piano Roll-like matrix from seprsco.
-  representation: 'roll'
+data_processor:
+    representation: 'roll'
+    sample_len: 256
+    cutting_step: 256
+    rows: 8
 
-  sample_len: 256  # 24 Hz, 256 / 24 ~ 10,6 sec.
-  cutting_step: 256  # No overlapping when sample_len >= cutting_step.
-  rows: 8
+gan_training:
+    mlflow_server_url: null
+    experiment_name: 'NESM-GAN Baseline'
+
+    generator_version: 'ver0_deeper_len256_row8'
+    noise_vector_len: 100
+    generator_load_path: null
+
+    discriminator_version: 'ver0_len256_row8'
+    discriminator_load_path: null
+
+    epochs: 500000
+    batch_size: 256
+
+    generator_learning_rate: 0.002
+    discriminator_learning_rate: 0.0002
+    weight_decay: null
+
+    generator_steps_per_epoch: 5
+    discriminator_steps_per_epoch: 1
+
+    use_early_stopping: false

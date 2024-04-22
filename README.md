@@ -2,7 +2,7 @@
 
 ## About
 
-This project generates new 8-bit style music using a Generative Adversarial Network (GAN).
+This project generates new 8-bit style music using a Deep Convolutional Generative Adversarial Network (GAN).
 
 ## Usage
 

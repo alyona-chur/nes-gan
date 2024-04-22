@@ -182,11 +182,6 @@ cython_debug/
 # Images
 *.png
 *.jpg
-!data/test_meme.jpg
-!data/test_portrait.jpg
-!data/test_sticker.jpg
-!data/watermarks/
-!data/watermarks/text_bbbbb.png
 
 # Media files
 *.wav
@@ -229,3 +224,9 @@ appendonlydir
 
 # Configuration
 !components/data_processor/example_config.yaml
+
+# ML Flow
+mlruns/
+
+# Data
+data/
